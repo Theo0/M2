@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move 8 elements to &apos;TP1-HMIN306/src&apos;&#x0A;- Original project: &apos;TP1-HMIN306&apos;&#x0A;- Destination element: &apos;TP1-HMIN306/src&apos;&#x0A;- Original elements:&#x0A;     Impot.java&#x0A;     PrincipalImpot.java&#x0A;     DonneesHistorique.java&#x0A;     Imposable.java&#x0A;     Personne.java&#x0A;     Tranche.java&#x0A;     Revenu.java&#x0A;     FeuilleImpot.java&#x0A;- Update references to refactored element" description="Move files" destination="/src" element1="Impot.java" element2="PrincipalImpot.java" element3="DonneesHistorique.java" element4="Imposable.java" element5="Personne.java" element6="Tranche.java" element7="Revenu.java" element8="FeuilleImpot.java" files="8" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1442834997327" units="0" version="1.0"/>
+</session>

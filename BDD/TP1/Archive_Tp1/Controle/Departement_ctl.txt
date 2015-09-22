@@ -1,0 +1,11 @@
+LOAD DATA 
+CHARACTERSET UTF8
+INFILE '/auto_home/tchambon/Documents/M2/BDD/TP1/Archive_Tp1/Donnees/Departement.csv'
+APPEND
+INTO TABLE DEPARTEMENT
+FIELDS TERMINATED BY X'9'
+(reg  "to_char(:reg)",
+dep  "to_char(:dep)",
+chef_lieu "to_char(:chef_lieu)",
+nom_dep "to_char(:nom_dep)"
+)

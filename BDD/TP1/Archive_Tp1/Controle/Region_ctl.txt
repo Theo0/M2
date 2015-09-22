@@ -1,0 +1,11 @@
+LOAD DATA 
+CHARACTERSET UTF8
+INFILE '/auto_home/tchambon/Documents/M2/BDD/TP1/Archive_Tp1/Controle/Region.csv'
+APPEND
+INTO TABLE REGION
+FIELDS TERMINATED BY X'9'
+(reg  "to_char(:reg)",
+chef_lieu "to_char(:chef_lieu)",
+nom_reg "to_char(:nom_reg)"
+)
+

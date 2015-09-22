@@ -1,0 +1,95 @@
+
+-- sqlldr userid=user/mdp@venus/master control=Commune_ctl.txt
+-- quelques manipulations après chargement des tuples dans communes
+
+update Commune set dep='0'||dep where dep <10;
+
+update Commune_15 set dep='2A' where dep ='201';
+update Commune_15 set dep='2B' where dep ='202';
+
+update Commune_15 set com='00'||com where length(com)=1;
+update Commune_15 set com='0'||com where length(com)=2;
+
+-- Region
+create table Region_15
+(reg varchar(4), chef_lieu varchar(46), nom_reg varchar(30), constraint region_15_pk primary key(reg));
+
+-- Departement
+create table Departement_15
+(reg varchar(4), dep varchar(4), chef_lieu varchar(46), nom_dep varchar(30), constraint departement_15_pk primary key(dep));
+
+alter table Departement_15 add constraint departement_15_fk foreign key (reg) references Region_15(reg);
+
+--Nom et population en 2010 des communes de l'Hérault
+
+select com_nom, round(pop_2010,0) from Commune_15 c, Departement_15 d where c.dep = d.dep and nom_dep = 'HERAULT';
+
+-- Nom, population en 1975 et population en 2010 des communes qui ont connu un afflux de population entre 1975 et 2010
+
+select com_nom, round(pop_1975,0), round(pop_2010,0) from Commune_15 c where round(pop_2010,0)-round(pop_1975,0)>0;
+
+-- Nom, population en 1975 et population en 2010 des communes de Languedoc-Roussillon (triées par ordre alphabetique) qui ont connu une diminution de population entre 1975 et 2010
+
+select com_nom, (round(pop_2010,0)-round(pop_1975,0)) as recul from Commune_15 c, Region_15 r where round(pop_2010,0)-round(pop_1975,0)<0 and c.reg = r.reg and nom_reg = 'LANGUEDOC-ROUSSILLON' order by com_nom ;
+
+-- vue qui collecte les informations des communes (nom commune, nom département, nom région et recul de population) dont la population a baissé entre 2000 et 2010 et consultation de cette vue
+create view v_declin as 
+select code_insee, com_nom, (round(pop_2010,0)-round(pop_2000,0)) as recul, nom_dep, nom_reg  from Commune_15 c, Departement_15 d, Region_15 r where round(pop_2010,0)-round(pop_2000,0)<0 and c.dep = d.dep and d.reg=r.reg order by com_nom ;
+
+select * from v_declin;
+
+-- Existe t'il des départements dont aucune commune n'a subi de recul de population entre 2000 et 2010
+
+select nom_dep from departement_15
+minus select nom_dep from v_declin;
+
+-- Nom de la ou des communes du  Languedoc-Roussillon qui ont le plus grand différentiel en terme de diminution de population (nombre de personnes) entre 1975 et 2010
+ 
+select com_nom, (round(pop_2010,0)-round(pop_1975,0)) as recul from Commune_15 c, Region_15 r where (round(pop_2010,0)-round(pop_1975,0)) <0 and c.reg = r.reg and nom_reg = 'LANGUEDOC-ROUSSILLON' and (round(pop_2010,0)-round(pop_1975,0)) = (select min((round(pop_2010,0)-round(pop_1975,0))) from Commune_15 c, Region_15 r where c.reg = r.reg and nom_reg = 'LANGUEDOC-ROUSSILLON' ) ;
+
+-- Donner pour la plus petit commune (ou les plus petites communes) de France métropolitaine (en nombre d'habitants en 2010), son nom, le nom de son département et le nom de sa région 
+select com_nom, pop_1975, pop_2010, nom_dep, nom_reg from Commune_15 c, Departement_15 d, Region_15 r where pop_2010 = (select min(pop_2010) from Commune_15) and d.dep = c.dep and r.reg = d.reg;
+
+-- Donner le nombre de départements par région
+select r.reg, nom_reg, count(dep) as nbreDep from region_15 r, departement_15 d where d.reg = r.reg group by r.reg, nom_reg;
+
+-- Donner le nombre de communes et de départements par région 
+select reg, count(distinct dep), count(code_insee) from Commune_15 group by reg;
+
+
+-- Donner les communes qui sont à la fois chef lieu de région et de département
+select com_nom from commune_15 where code_insee in (
+select chef_lieu from region_15
+intersect
+select chef_lieu from departement_15);
+
+-- Donner les communes qui sont chef lieu de département mais non de région
+
+-- Donner les communes qui sont chef lieu de région mais non de département
+
+-- Nom de la ou des communes du  Languedoc-Roussillon qui ont le plus grand différentiel en terme de diminution de population (en pourcentage comparé) entre 1975 et 2010
+
+
+(passer par une vue pour le nombre de communes par département)
+drop view DeptNbreCommunes;
+create view DeptNbreCommunes as select d.dep, nom_dep, d.reg count(com) as NbreC from Commune_15 c, Departement_15 d where d.dep = c.dep group by d.dep, nom_dep, d.reg; 
+
+select r.reg, nom_reg, sum(nbreC) as nbreCommunes from region_15 r, DeptNbreCommunes d where d.reg = r.reg group by r.reg, nom_reg;
+ 
+ alter table commune_15 drop column reg;
+
+ALTER TABLE commune_15
+RENAME COLUMN com_nom TO nom_com;
+
+
+alter table Commune_15 add code_insee varchar(6);
+update Commune_15 set code_insee = dep||com ;
+alter table Commune_15 add constraint commune_15_pk primary key (code_insee);
+
+
+
+
+
+
+
+ 
